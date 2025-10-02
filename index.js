@@ -1,4 +1,3 @@
-
 import readline from "readline";
 
 const FONT_STYLE = "\x1b[1;34m";
