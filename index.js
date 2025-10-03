@@ -11,22 +11,16 @@ const API_URL = "https://fakestoreapi.com/products";
 
 // Obtener listado completo de productos
 async function showAllProducts() {
-  try {
-    const response = await fetch(API_URL);
+  const response = await fetch(API_URL);
 
-    if (!response.ok) {
-      throw new Error(
-        `Error status: ${response.status}. Error al obtener los productos`
-      );
-    }
-
-    const data = await response.json();
-    console.log(data);
-  } catch (error) {
-    console.error(error.message);
-  } finally {
-    console.log(`Proceso finalizado`);
+  if (!response.ok) {
+    throw new Error(
+      `Error status: ${response.status}. Error al obtener los productos`
+    );
   }
+
+  const data = await response.json();
+  return data;
 }
 
 // Obtener producto por ID
@@ -36,7 +30,9 @@ async function showProducts() {
     // console.log(resourceName, productID);
 
     if (!productID) {
-      return showAllProducts();
+      const allProducts = await showAllProducts();
+      console.log(allProducts);
+      return;
     }
 
     const response = await fetch(API_URL + "/" + productID);
@@ -116,7 +112,7 @@ async function storeProducts() {
       productCategory === undefined
     ) {
       throw new Error(
-        "Error falta uno de los siguientes argumentos \n Nombre, precio, categoría \n ejemplo correcto: npm run start POST products T-Shirt-Rex 300 remeras"
+        "Error falta uno o varios de los siguientes argumentos \n Nombre, precio, categoría \n ejemplo correcto: npm run start POST products T-Shirt-Rex 300 remeras"
       );
     }
 
