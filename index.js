@@ -1,11 +1,11 @@
-import readline from "readline";
+import { askConfirm, getResourceAndID, checkPositiveNumber } from "./utils.js";
 
 const FONT_STYLE = "\x1b[1;34m";
 const RESET_FONT_STYLE = "\x1b[0m";
 
-const [method, resource, productTitle, productPrice, productCategory] =
+const [method, resource, inputTitle, inputPrice, inputCategory] =
   process.argv.slice(2);
-// console.log(method, resource, productTitle, productPrice, productCategory);
+// console.log(method, resource, inputTitle, inputPrice, inputCategory);
 
 const API_URL = "https://fakestoreapi.com/products";
 
@@ -107,13 +107,15 @@ async function deleteProducts() {
 async function storeProducts() {
   try {
     if (
-      productTitle === undefined ||
-      productPrice === undefined ||
-      productCategory === undefined
+      inputTitle === undefined ||
+      inputPrice === undefined ||
+      inputCategory === undefined
     ) {
       throw new Error(
         "Error falta uno o varios de los siguientes argumentos \n Nombre, precio, categoría \n ejemplo correcto: npm run start POST products T-Shirt-Rex 300 remeras"
       );
+    } else if (!checkPositiveNumber(inputPrice)) {
+      throw new Error("El precio debe ser un valor numérico y superior a 0");
     }
 
     const response = await fetch(API_URL, {
@@ -122,9 +124,9 @@ async function storeProducts() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        title: productTitle,
-        price: productPrice,
-        category: productCategory,
+        title: inputTitle,
+        price: inputPrice,
+        category: inputCategory,
       }),
     });
 
@@ -141,48 +143,6 @@ async function storeProducts() {
   } finally {
     console.log(`Proceso finalizado`);
   }
-}
-
-//  Verificar que los comandos ingresados estén correctos y obtener el ID de existir
-function getResourceAndID(resource) {
-  if (!resource) {
-    throw new Error(
-      "Falto ingresar el recurso 'products' a continuación del método http"
-    );
-  }
-  const [resourceName, idPart] = resource.split("/");
-
-  if (resourceName !== "products") {
-    throw new Error(`El recurso ingresado no es válido: ${resourceName}.`);
-  }
-
-  if (!idPart) {
-    return { resourceName, productID: null };
-  }
-
-  const productID = Number(idPart);
-
-  if (Number.isNaN(productID)) {
-    throw new Error(`El ID ingresado no es un valor válido: ${idPart}`);
-  }
-
-  return { resourceName, productID };
-}
-
-// función para confirmar antes de eliminar productos usando readline (de node)
-// Usando promesa para esperar la respuesta del usuario y await para evitar un undefined
-// process.stdin "escucha" lo que el usuario escribe como un listener
-function askConfirm(query) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  return new Promise((resolve) =>
-    rl.question(query, (ans) => {
-      rl.close();
-      resolve(ans);
-    })
-  );
 }
 
 switch (method) {
